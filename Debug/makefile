@@ -64,8 +64,8 @@ all: main-build
 main-build: StrobeHMI.elf secondary-outputs
 
 # Tool invocations
-StrobeHMI.elf StrobeHMI.map: $(OBJS) $(USER_OBJS) /media/data/01_Engineering/01_Projects/12_1_kV_strobe_v2/10_Code/StrobeHMI/STM32G431K8TX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "StrobeHMI.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/media/data/01_Engineering/01_Projects/12_1_kV_strobe_v2/10_Code/StrobeHMI/STM32G431K8TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="StrobeHMI.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+StrobeHMI.elf StrobeHMI.map: $(OBJS) $(USER_OBJS) /mnt/Data/01_Engineering/01_Projects/12_1_kV_strobe_v2/10_Code/StrobeHMI/STM32G431K8TX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "StrobeHMI.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/mnt/Data/01_Engineering/01_Projects/12_1_kV_strobe_v2/10_Code/StrobeHMI/STM32G431K8TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="StrobeHMI.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

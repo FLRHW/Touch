@@ -53,17 +53,27 @@
 #define PERMAX				800000			// Maximum period, in us
 #define FREQMAX				20000			// Maximum frequency 1 = 0.01 Hz
 #define SUPMAX				1000			// Maximum supply voltage, in V
-#define BUSINI				600
+#define BUSINI				500
 #define POWERINI			10
 #define IPEAKINI			1
-#define BUSMIN				400
+#define ENERGYINI			1
+#define BRESINI				1
+#define VCOLINI				1
+#define BUSMIN				0 //400
 #define POWERMIN			0
 #define IPEAKMIN			0
-#define BUSMAX				1000
-#define POWERMAX			1000
-#define IPEAKMAX			900
-#define RX_SIZE				10				// Amount of bytes to be received from the uart
-#define MEASCNT				3				// Amount of measured parameters
+#define ENERGYMIN			0
+#define BRESMIN				0
+#define VCOLMIN				0
+#define BUSMAX				9999 //1000
+#define POWERMAX			9999 //1000
+#define IPEAKMAX			999 //900
+#define ENERGYMAX			999
+#define BRESMAX				9999
+#define VCOLMAX				999
+#define RX_SIZE				(MEASCNT)*3+1	// Amount of bytes to be received from the UART - 3 BYTES PER MEASUREMENT + 1 BYTE FOR CRC
+#define TX_SIZE				10				// Amount of bytes to be transmitted by the UART
+#define MEASCNT				6				// Amount of measured parameters
 #define SEP					1
 
 
@@ -89,7 +99,7 @@
 // ------------------------- 		ENUMS			-------------------------
 
 enum ParamTypes { PERIOD, FREQUENCY, SUPPLY, PARAMS };
-enum MeasTypes { BUS, POWER, IPEAK, MEASUREMENTS };
+enum MeasTypes { BUS, POWER, IPEAK, ENERGY, BRES, VCOL, MEASUREMENTS };
 typedef enum { INCREASE, DECREASE, BUTTONP, ACTYPES } ReqTypes;
 
 
@@ -115,12 +125,13 @@ const uint16_t param_min[PARAMS] = {PERMIN, FREQMIN, SUPMIN};
 const uint32_t param_max[PARAMS] = {PERMAX, FREQMAX, SUPMAX};
 uint8_t maxpos_par[PARAMS] = {6, 5, 4};	// Stores maximum number of digits for each parameter
 
-int32_t meas[PARAMS] = {BUSINI, POWERINI, IPEAKINI};							// Buffer for decoded "meas_data"
-const uint16_t meas_min[MEASUREMENTS] = {BUSMIN, POWERMIN, IPEAKMIN};
-const uint16_t meas_max[MEASUREMENTS] = {BUSMAX, POWERMAX, IPEAKMAX};
-uint8_t maxpos_meas[MEASCNT] = {4, 4, 3};	// Stores maximum number of digits for each measurement
+int32_t meas[MEASUREMENTS] = {BUSINI, POWERINI, IPEAKINI, ENERGYINI, BRESINI, VCOLINI};	// Buffer for decoded "meas_data"
+const uint16_t meas_min[MEASUREMENTS] = {BUSMIN, POWERMIN, IPEAKMIN, ENERGYMIN, BRESMIN, VCOLMIN};
+const uint16_t meas_max[MEASUREMENTS] = {BUSMAX, POWERMAX, IPEAKMAX, ENERGYMAX, BRESMAX, VCOLMAX};
+uint8_t maxpos_meas[MEASCNT] = {4, 4, 3, 3, 4, 3};	// Stores maximum number of digits for each measurement
 bool param_update;
 uint8_t param_disp;
+
 
 const uint8_t pattern[ACTYPES][PAT_SIZE] = {// Data is stored in reverse order in the array, i.e., pattern[x][0] is the last in the sequence whereas pattern [x][PAT_SIZE-1] is the 1st
  	{7,5,4,6,7},							// Encoder rotates clockwise
@@ -164,7 +175,7 @@ void uDMA1_Channel4_IRQHandler(void) {		// USART RX
 	LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_4);
 }
 
-void uTIM2_IRQHandler(void) {				// Currently running @ 5 kHz. Triggers screen update and other timed events
+void uTIM2_IRQHandler(void) {				// Currently running @ 5 kHz. Creates system time
 	static uint16_t irq_cnt = 0;			// Counts from 0-4999 each time TIM2 IRQ is run (@ 5 kHz | 200 uS intervals)
 	static uint8_t msec_cnt = 0;
 	if (LL_TIM_IsActiveFlag_UPDATE(TIM2)) {
@@ -249,11 +260,6 @@ void hmi_config(void) {						// Carries out general configuration for the board
 
     LL_USART_Disable(USART1);				// RESET UART (otherwise power cycle is required for proper execution)
     LL_USART_Enable(USART1);
-
-
-
-
-
 }
 
 
@@ -353,17 +359,17 @@ void sc_ain_dbg(void){
 }
 
 
-void sc_meas_data (uint8_t id) {				// Prints the variable contents (target frequency, period, voltage, measurements)
+void sc_meas_data (uint8_t id) {				// Prints the variable contents (measurements)
 	char temp_string[10+1];					// Stores up to 10 digits + null
 	uint8_t past_dot;
 	uint16_t x, y;
-	if (id > 2) {
+	if (id > 5) {
 		return;
 	}
 	u32_to_ascii (meas[id], temp_string, maxpos_meas[id]);
 	past_dot = 1;
 	x = 120 + (6 - maxpos_meas[id] + past_dot) * CHARWIDTH;
-	y = 106 - ((2-id) - PARAMS) * CHARHEIGHT, temp_string;
+	y = 106 - ((5-id) - MEASUREMENTS) * CHARHEIGHT, temp_string;
 	ILI9341_DrawStringD(x, y, temp_string, WHITE, BLACK);
 }
 
@@ -566,13 +572,16 @@ void process_adc (uint8_t ch) {
 void load_def_screen(void) {
 	ILI9341_FillScreen(BLACK); 				// Black background
 	ILI9341_DrawStringD(50, 20, "1 kV STROBE", WHITE, BLACK);
-	ILI9341_DrawStringD(10, 60,  "SUPPLY:           V ", YELLOW, BLACK);
-	ILI9341_DrawStringD(10, 60 + 1 * CHARHEIGHT,  "FREQUENCY:        Hz", MAGENTA, BLACK);
-	ILI9341_DrawStringD(10, 60 + 2 * CHARHEIGHT, "PERIOD:           ms", TURQUOISE, BLACK);
-	ILI9341_DrawStringD(10, 60 + 3 * CHARHEIGHT, "BUS:              V", RED, BLACK);
+	ILI9341_DrawStringD(10, 60,  "SUPPLY:           V ", TURQUOISE, BLACK);
+	ILI9341_DrawStringD(10, 60 + 1 * CHARHEIGHT,  "FREQUENCY:        Hz", TURQUOISE, BLACK);
+	ILI9341_DrawStringD(10, 60 + 2 * CHARHEIGHT, "WIDTH:            ms", TURQUOISE, BLACK);
+	ILI9341_DrawStringD(10, 60 + 3 * CHARHEIGHT, "BUS:              V", GREEN, BLACK);
 	ILI9341_DrawStringD(10, 60 + 4 * CHARHEIGHT, "Power:            W", GREEN, BLACK);
-	ILI9341_DrawStringD(10, 60 + 5 * CHARHEIGHT, "Ipeak:            A", BLUE, BLACK);
-	ILI9341_DrawStringD(0, DISPHEIGHT - CHARHEIGHT - 1, "Uptime:            ms", WHITE, BLACK);
+	ILI9341_DrawStringD(10, 60 + 5 * CHARHEIGHT, "Ipeak:            A", GREEN, BLACK);
+	ILI9341_DrawStringD(10, 60 + 6 * CHARHEIGHT, "Energy:           J", GREEN, BLACK);
+	ILI9341_DrawStringD(10, 60 + 7 * CHARHEIGHT, "BRES:             V", GREEN, BLACK);
+	ILI9341_DrawStringD(10, 60 + 8 * CHARHEIGHT, "VCOL:             V", GREEN, BLACK);
+	ILI9341_DrawStringD(0, DISPHEIGHT - CHARHEIGHT - 1, "Uptime:            ms", BLUE, BLACK);
 }
 
 
@@ -619,20 +628,20 @@ bool uart_rx (void) {
 
 
 void uart_tx (void) {
-	static uint8_t uart_tx_buf[10];
+	static uint8_t uart_tx_buf[TX_SIZE];
 	uint8_t crc = 0;
-	for(uint8_t i = 0; i < 9; i++) {
+	for(uint8_t i = 0; i < TX_SIZE-1; i++) {
 		uart_tx_buf[i] = GET_BYTE(param_req[i / 3], i % 3);
 	    crc ^= uart_tx_buf[i];
 	    for(uint8_t j = 0; j < 8; j++) {
 	        crc = (crc & 0x80) ? (crc << 1) ^ 0x07 : (crc << 1);
 	    }
 	}
-	uart_tx_buf[9] = crc;
+	uart_tx_buf[TX_SIZE-1] = crc;
 
 	if (!LL_DMA_IsEnabledChannel(DMA1, LL_DMA_CHANNEL_3)) {
 		if (LL_USART_IsActiveFlag_TC(USART1)) {         // DMA channel not active// UART transmission complete
-			UART1_Transmit_DMA(uart_tx_buf,10);
+			UART1_Transmit_DMA(uart_tx_buf,TX_SIZE);
 		}
 	}
 }
@@ -654,10 +663,10 @@ void hmi_main() {
 	while (1) {
 		if (miliseconds > LED_tog_t) {
 			LED_tog_t = miliseconds + LED_TOGGLE_PER;
-			LL_GPIO_TogglePin(GPIOA, LL_GPIO_PIN_0);
+//			LL_GPIO_TogglePin(GPIOA, LL_GPIO_PIN_0);
 		}
 		if (miliseconds > meas_upd_t) {
-			if (++meas_sc == 3) {
+			if (++meas_sc == MEASCNT) {
 				meas_sc = 0;
 			}
 			sc_meas_data(meas_sc);
