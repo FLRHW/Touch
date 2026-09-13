@@ -37,48 +37,7 @@
 #define MENU_H      50
 
 
-static void draw_up_arrow(uint16_t cx,
-                          uint16_t top,
-                          uint16_t color)
-{
-    /*
-     * Simple filled triangle.
-     */
-    for (uint16_t i = 0; i < 18; i++)
-    {
-        uint16_t width = (i * 2) + 1;
 
-        ILI9341_FillRect(
-            cx - (width / 2),
-            top + i,
-            width,
-            1,
-            color
-        );
-    }
-}
-
-
-static void draw_down_arrow(uint16_t cx,
-                            uint16_t top,
-                            uint16_t color)
-{
-    /*
-     * Inverted filled triangle.
-     */
-    for (uint16_t i = 0; i < 18; i++)
-    {
-        uint16_t width = ((18 - i) * 2) - 1;
-
-        ILI9341_FillRect(
-            cx - (width / 2),
-            top + i,
-            width,
-            1,
-            color
-        );
-    }
-}
 
 
 static void draw_menu_icon(void)
@@ -146,7 +105,7 @@ static void draw_lift_button(void)
         WHITE
     );
 
-    draw_up_arrow(
+    ILI9341_DrawUpArrow(
         RIGHT_X + (RIGHT_W / 2),
         20,
         WHITE
@@ -181,7 +140,7 @@ static void draw_lower_button(void)
         BLACK
     );
 
-    draw_down_arrow(
+    ILI9341_DrawDownArrow(
         RIGHT_X + (RIGHT_W / 2),
         193,
         WHITE

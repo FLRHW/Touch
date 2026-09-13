@@ -68,6 +68,14 @@ void ILI9341_DrawStringScale(uint16_t x,
                             uint16_t color,
                             uint16_t bg);
 
+void ILI9341_DrawUpArrow(uint16_t cx,
+                         uint16_t top,
+                         uint16_t color);
+
+void ILI9341_DrawDownArrow(uint16_t cx,
+                           uint16_t top,
+                           uint16_t color);
+
 void ILI9341_FillScreen(uint16_t color);
 void ILI9341_Init(void);
 void drawTrace(uint16_t x, uint16_t y, uint16_t colour);

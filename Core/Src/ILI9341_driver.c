@@ -123,32 +123,51 @@ void ILI9341_DrawRect(uint16_t x,
                       uint16_t thickness,
                       uint16_t color)
 {
+    uint16_t px;
+
     if ((width == 0) || (height == 0) || (thickness == 0))
         return;
 
-    /* Top */
-    ILI9341_FillRect(x, y, width, thickness, color);
+    if ((x + width) > DISPWIDTH)
+        return;
 
-    /* Bottom */
-    ILI9341_FillRect(x,
-                     y + height - thickness,
-                     width,
-                     thickness,
-                     color);
+    if ((y + height) > DISPHEIGHT)
+        return;
 
-    /* Left */
-    ILI9341_FillRect(x,
-                     y,
-                     thickness,
-                     height,
-                     color);
+    ILI9341_SetAddress(
+        x,
+        y,
+        x + width - 1,
+        y + height - 1
+    );
 
-    /* Right */
-    ILI9341_FillRect(x + width - thickness,
-                     y,
-                     thickness,
-                     height,
-                     color);
+    DC_HIGH();
+    CS_LOW();
+
+    for (uint16_t row = 0; row < height; row++)
+    {
+        for (uint16_t col = 0; col < width; col++)
+        {
+            if ((row < thickness) ||
+                (row >= (height - thickness)) ||
+                (col < thickness) ||
+                (col >= (width - thickness)))
+            {
+                px = color;
+            }
+            else
+            {
+                px = BLACK;
+            }
+
+            ILI9341_SPI_Send(px >> 8);
+            ILI9341_SPI_Send(px & 0xFF);
+        }
+    }
+
+    while (LL_SPI_IsActiveFlag_BSY(SPI1));
+
+    CS_HIGH();
 }
 
 // Display initialisation
@@ -351,45 +370,172 @@ void ILI9341_DrawStringScale(uint16_t x,
                             uint16_t color,
                             uint16_t bg)
 {
+    uint16_t cursor_x;
+
     if ((str == NULL) || (scale == 0))
         return;
 
-    uint16_t cursor_x = x;
+    cursor_x = x;
 
     while (*str != '\0')
     {
-        const uint16_t *bitmap =
-            font11x23[(uint8_t)*str];
+        const uint16_t *bitmap;
+        uint16_t char_width;
+        uint16_t char_height;
+
+        bitmap = font11x23[(uint8_t)*str];
+
+        char_width  = CHARWIDTH  * scale;
+        char_height = CHARHEIGHT * scale;
+
+        ILI9341_SetAddress(
+            cursor_x,
+            y,
+            cursor_x + char_width - 1,
+            y + char_height - 1
+        );
+
+        DC_HIGH();
+        CS_LOW();
 
         for (uint8_t row = 0; row < CHARHEIGHT; row++)
         {
             uint16_t bits = bitmap[row];
 
-            for (uint8_t col = 0; col < CHARWIDTH; col++)
+            /*
+             * Repeat each original font row vertically.
+             */
+            for (uint8_t sy = 0; sy < scale; sy++)
             {
-                uint16_t pixel_color;
+                for (uint8_t col = 0; col < CHARWIDTH; col++)
+                {
+                    uint16_t px;
 
-                if (bits & (1U << (15 - col)))
-                    pixel_color = color;
-                else
-                    pixel_color = bg;
+                    if (bits & (1U << (15 - col)))
+                        px = color;
+                    else
+                        px = bg;
 
-                ILI9341_FillRect(
-                    cursor_x + ((uint16_t)col * scale),
-                    y + ((uint16_t)row * scale),
-                    scale,
-                    scale,
-                    pixel_color
-                );
+                    /*
+                     * Repeat each original pixel horizontally.
+                     */
+                    for (uint8_t sx = 0; sx < scale; sx++)
+                    {
+                        ILI9341_SPI_Send(px >> 8);
+                        ILI9341_SPI_Send(px & 0xFF);
+                    }
+                }
             }
         }
 
-        cursor_x += CHARWIDTH * scale;
+        while (LL_SPI_IsActiveFlag_BSY(SPI1));
+
+        CS_HIGH();
+
+        cursor_x += char_width;
         str++;
     }
 }
 
+void ILI9341_DrawUpArrow(uint16_t cx,
+                         uint16_t top,
+                         uint16_t color)
+{
+    const uint16_t width  = 35;
+    const uint16_t height = 18;
+    uint16_t left = cx - (width / 2);
 
+    ILI9341_SetAddress(
+        left,
+        top,
+        left + width - 1,
+        top + height - 1
+    );
+
+    DC_HIGH();
+    CS_LOW();
+
+    for (uint16_t row = 0; row < height; row++)
+    {
+        uint16_t half_width = row;
+
+        for (uint16_t col = 0; col < width; col++)
+        {
+            int16_t dx =
+                (int16_t)col - (int16_t)(width / 2);
+
+            uint16_t px;
+
+            if ((dx >= -(int16_t)half_width) &&
+                (dx <=  (int16_t)half_width))
+            {
+                px = color;
+            }
+            else
+            {
+                px = BLACK;
+            }
+
+            ILI9341_SPI_Send(px >> 8);
+            ILI9341_SPI_Send(px & 0xFF);
+        }
+    }
+
+    while (LL_SPI_IsActiveFlag_BSY(SPI1));
+
+    CS_HIGH();
+}
+
+
+void ILI9341_DrawDownArrow(uint16_t cx,
+                           uint16_t top,
+                           uint16_t color)
+{
+    const uint16_t width  = 35;
+    const uint16_t height = 18;
+    uint16_t left = cx - (width / 2);
+
+    ILI9341_SetAddress(
+        left,
+        top,
+        left + width - 1,
+        top + height - 1
+    );
+
+    DC_HIGH();
+    CS_LOW();
+
+    for (uint16_t row = 0; row < height; row++)
+    {
+        uint16_t half_width =
+            (height - 1) - row;
+
+        for (uint16_t col = 0; col < width; col++)
+        {
+            int16_t dx =
+                (int16_t)col - (int16_t)(width / 2);
+
+            uint16_t px;
+
+            if ((dx >= -(int16_t)half_width) &&
+                (dx <=  (int16_t)half_width))
+            {
+                px = color;
+            }
+            else
+            {
+                px = BLACK;
+            }
+
+            ILI9341_SPI_Send(px >> 8);
+            ILI9341_SPI_Send(px & 0xFF);
+        }
+    }
+
+    while (LL_SPI_IsActiveFlag_BSY(SPI1));
+
+    CS_HIGH();
+}
 
 
 
