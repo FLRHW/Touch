@@ -1,158 +1,256 @@
 #include "main.h"
 #include "hmi.h"
 #include "ILI9341_driver.h"
-#include "touch.h"
-#include <stdbool.h>
 
 
-#define BUTTON1_X 20
-#define BUTTON1_Y 60
-#define BUTTON1_W 200
-#define BUTTON1_H 90
-
-#define BUTTON2_X 20
-#define BUTTON2_Y 180
-#define BUTTON2_W 200
-#define BUTTON2_H 90
+/*
+ * ------------------------------------------------------------
+ * Simple static UI preview
+ * 320 x 240 landscape
+ * ------------------------------------------------------------
+ */
 
 
-static bool inside_button(uint16_t x, uint16_t y,
-                          uint16_t bx, uint16_t by,
-                          uint16_t bw, uint16_t bh)
+/* Memory buttons */
+#define MEM_Y       154
+#define MEM_W       66
+#define MEM_H       74
+
+#define M1_X        10
+#define M2_X        86
+#define M3_X        162
+
+
+/* Lift / Lower buttons */
+#define RIGHT_X     240
+#define RIGHT_W     70
+#define RIGHT_H     88
+
+#define LIFT_Y      10
+#define LOWER_Y     140
+
+
+/* Settings/Menu button */
+#define MENU_X      10
+#define MENU_Y      10
+#define MENU_W      50
+#define MENU_H      50
+
+
+static void draw_up_arrow(uint16_t cx,
+                          uint16_t top,
+                          uint16_t color)
 {
-    return ((x >= bx) &&
-            (x < (bx + bw)) &&
-            (y >= by) &&
-            (y < (by + bh)));
+    /*
+     * Simple filled triangle.
+     */
+    for (uint16_t i = 0; i < 18; i++)
+    {
+        uint16_t width = (i * 2) + 1;
+
+        ILI9341_FillRect(
+            cx - (width / 2),
+            top + i,
+            width,
+            1,
+            color
+        );
+    }
+}
+
+
+static void draw_down_arrow(uint16_t cx,
+                            uint16_t top,
+                            uint16_t color)
+{
+    /*
+     * Inverted filled triangle.
+     */
+    for (uint16_t i = 0; i < 18; i++)
+    {
+        uint16_t width = ((18 - i) * 2) - 1;
+
+        ILI9341_FillRect(
+            cx - (width / 2),
+            top + i,
+            width,
+            1,
+            color
+        );
+    }
+}
+
+
+static void draw_menu_icon(void)
+{
+    /*
+     * Settings/menu button outline.
+     */
+    ILI9341_DrawRect(
+        MENU_X,
+        MENU_Y,
+        MENU_W,
+        MENU_H,
+        3,
+        WHITE
+    );
+
+    /*
+     * Three horizontal menu bars.
+     */
+    ILI9341_FillRect(21, 23, 28, 4, WHITE);
+    ILI9341_FillRect(21, 33, 28, 4, WHITE);
+    ILI9341_FillRect(21, 43, 28, 4, WHITE);
+}
+
+
+static void draw_memory_button(uint16_t x,
+                               const char *text)
+{
+    ILI9341_DrawRect(
+        x,
+        MEM_Y,
+        MEM_W,
+        MEM_H,
+        3,
+        WHITE
+    );
+
+    /*
+     * 2 characters at scale 2:
+     *
+     * 2 * 11 * 2 = 44 pixels wide
+     * 23 * 2     = 46 pixels high
+     *
+     * Centre inside 66 x 74 button.
+     */
+    ILI9341_DrawStringScale(
+        x + 11,
+        MEM_Y + 14,
+        text,
+        2,
+        WHITE,
+        BLACK
+    );
+}
+
+
+static void draw_lift_button(void)
+{
+    ILI9341_DrawRect(
+        RIGHT_X,
+        LIFT_Y,
+        RIGHT_W,
+        RIGHT_H,
+        3,
+        WHITE
+    );
+
+    draw_up_arrow(
+        RIGHT_X + (RIGHT_W / 2),
+        20,
+        WHITE
+    );
+
+    ILI9341_DrawStringNoDMA(
+        RIGHT_X + 8,
+        61,
+        "LIFT",
+        WHITE,
+        BLACK
+    );
+}
+
+
+static void draw_lower_button(void)
+{
+    ILI9341_DrawRect(
+        RIGHT_X,
+        LOWER_Y,
+        RIGHT_W,
+        RIGHT_H,
+        3,
+        WHITE
+    );
+
+    ILI9341_DrawStringNoDMA(
+        RIGHT_X + 2,
+        151,
+        "LOWER",
+        WHITE,
+        BLACK
+    );
+
+    draw_down_arrow(
+        RIGHT_X + (RIGHT_W / 2),
+        193,
+        WHITE
+    );
 }
 
 
 static void draw_screen(void)
 {
+    /*
+     * Background
+     */
     ILI9341_FillScreen(BLACK);
 
-    ILI9341_DrawStringNoDMA(
-        65, 20,
-        "TOUCH TEST",
+
+    /*
+     * Menu/settings
+     */
+    draw_menu_icon();
+
+
+    /*
+     * Height readout.
+     *
+     * Existing 11x23 font enlarged 2x:
+     *
+     * "90 cm" = 5 chars
+     * width  = 5 * 11 * 2 = 110 pixels
+     * height = 23 * 2      = 46 pixels
+     */
+    ILI9341_DrawStringScale(
+        105,
+        26,
+        "90 cm",
+        2,
         WHITE,
         BLACK
     );
 
-    /*
-     * Button 1
-     */
-    ILI9341_DrawStringNoDMA(
-        55, 95,
-        "[ BUTTON 1 ]",
-        WHITE,
-        BLUE
-    );
 
     /*
-     * Button 2
+     * Lift / Lower
      */
-    ILI9341_DrawStringNoDMA(
-        55, 215,
-        "[ BUTTON 2 ]",
-        WHITE,
-        GREEN
-    );
+    draw_lift_button();
+    draw_lower_button();
+
+
+    /*
+     * Memory buttons
+     */
+    draw_memory_button(M1_X, "M1");
+    draw_memory_button(M2_X, "M2");
+    draw_memory_button(M3_X, "M3");
 }
 
 
 void hmi_main(void)
 {
-    uint16_t touch_x;
-    uint16_t touch_y;
-
     ILI9341_Init();
 
     draw_screen();
 
+    /*
+     * Static UI preview.
+     *
+     * No touch handling yet.
+     */
     while (1)
     {
-        if (Touch_GetPoint(&touch_x, &touch_y))
-        {
-            /*
-             * BUTTON 1
-             */
-            if (inside_button(touch_x,
-                              touch_y,
-                              BUTTON1_X,
-                              BUTTON1_Y,
-                              BUTTON1_W,
-                              BUTTON1_H))
-            {
-                /*
-                 * Make the text BLACK on a WHITE background.
-                 * This gives us a very obvious visual change.
-                 */
-                ILI9341_DrawStringNoDMA(
-                    55, 95,
-                    "[ BUTTON 1 ]",
-                    BLACK,
-                    WHITE
-                );
-
-                /*
-                 * Wait until finger/stylus is released.
-                 */
-                while (Touch_GetPoint(&touch_x, &touch_y))
-                {
-                    HAL_Delay(20);
-                }
-
-                /*
-                 * Restore normal appearance.
-                 */
-                ILI9341_DrawStringNoDMA(
-                    55, 95,
-                    "[ BUTTON 1 ]",
-                    WHITE,
-                    BLUE
-                );
-            }
-
-            /*
-             * BUTTON 2
-             */
-            else if (inside_button(touch_x,
-                                   touch_y,
-                                   BUTTON2_X,
-                                   BUTTON2_Y,
-                                   BUTTON2_W,
-                                   BUTTON2_H))
-            {
-                /*
-                 * Make the text BLACK on a WHITE background.
-                 */
-                ILI9341_DrawStringNoDMA(
-                    55, 215,
-                    "[ BUTTON 2 ]",
-                    BLACK,
-                    WHITE
-                );
-
-                /*
-                 * Wait until finger/stylus is released.
-                 */
-                while (Touch_GetPoint(&touch_x, &touch_y))
-                {
-                    HAL_Delay(20);
-                }
-
-                /*
-                 * Restore normal appearance.
-                 */
-                ILI9341_DrawStringNoDMA(
-                    55, 215,
-                    "[ BUTTON 2 ]",
-                    WHITE,
-                    GREEN
-                );
-            }
-        }
-
-        HAL_Delay(20);
+        HAL_Delay(1000);
     }
 }

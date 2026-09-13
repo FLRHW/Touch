@@ -78,6 +78,79 @@ void ILI9341_FillScreen(uint16_t color) {
     CS_HIGH();
 }
 
+
+void ILI9341_FillRect(uint16_t x,
+                      uint16_t y,
+                      uint16_t width,
+                      uint16_t height,
+                      uint16_t color)
+{
+    if ((width == 0) || (height == 0))
+        return;
+
+    if ((x >= DISPWIDTH) || (y >= DISPHEIGHT))
+        return;
+
+    if ((x + width) > DISPWIDTH)
+        width = DISPWIDTH - x;
+
+    if ((y + height) > DISPHEIGHT)
+        height = DISPHEIGHT - y;
+
+    ILI9341_SetAddress(x,
+                       y,
+                       x + width - 1,
+                       y + height - 1);
+
+    DC_HIGH();
+    CS_LOW();
+
+    uint32_t pixels = (uint32_t)width * height;
+
+    for (uint32_t i = 0; i < pixels; i++)
+    {
+        ILI9341_SPI_Send(color >> 8);
+        ILI9341_SPI_Send(color & 0xFF);
+    }
+
+    CS_HIGH();
+}
+
+void ILI9341_DrawRect(uint16_t x,
+                      uint16_t y,
+                      uint16_t width,
+                      uint16_t height,
+                      uint16_t thickness,
+                      uint16_t color)
+{
+    if ((width == 0) || (height == 0) || (thickness == 0))
+        return;
+
+    /* Top */
+    ILI9341_FillRect(x, y, width, thickness, color);
+
+    /* Bottom */
+    ILI9341_FillRect(x,
+                     y + height - thickness,
+                     width,
+                     thickness,
+                     color);
+
+    /* Left */
+    ILI9341_FillRect(x,
+                     y,
+                     thickness,
+                     height,
+                     color);
+
+    /* Right */
+    ILI9341_FillRect(x + width - thickness,
+                     y,
+                     thickness,
+                     height,
+                     color);
+}
+
 // Display initialisation
 void ILI9341_Init(void) {
 	// Set CS, DC, RST high initially
@@ -105,7 +178,8 @@ void ILI9341_Init(void) {
     DC_LOW();
     ILI9341_SPI_Send(ILI9341_MADCTL);
     DC_HIGH();
-    ILI9341_SPI_Send(0x88); // RGB, portrait
+    ILI9341_SPI_Send(0xE8); // RGB, landscape
+    //ILI9341_SPI_Send(0x88); // RGB, portrait
     DC_LOW();
     ILI9341_SPI_Send(ILI9341_DISPON);
     LL_mDelay(120);
@@ -270,6 +344,50 @@ void ILI9341_DrawStringNoDMA(uint16_t x, uint16_t y, const char* str, uint16_t c
     CS_HIGH();
 }
 
+void ILI9341_DrawStringScale(uint16_t x,
+                            uint16_t y,
+                            const char *str,
+                            uint8_t scale,
+                            uint16_t color,
+                            uint16_t bg)
+{
+    if ((str == NULL) || (scale == 0))
+        return;
+
+    uint16_t cursor_x = x;
+
+    while (*str != '\0')
+    {
+        const uint16_t *bitmap =
+            font11x23[(uint8_t)*str];
+
+        for (uint8_t row = 0; row < CHARHEIGHT; row++)
+        {
+            uint16_t bits = bitmap[row];
+
+            for (uint8_t col = 0; col < CHARWIDTH; col++)
+            {
+                uint16_t pixel_color;
+
+                if (bits & (1U << (15 - col)))
+                    pixel_color = color;
+                else
+                    pixel_color = bg;
+
+                ILI9341_FillRect(
+                    cursor_x + ((uint16_t)col * scale),
+                    y + ((uint16_t)row * scale),
+                    scale,
+                    scale,
+                    pixel_color
+                );
+            }
+        }
+
+        cursor_x += CHARWIDTH * scale;
+        str++;
+    }
+}
 
 
 

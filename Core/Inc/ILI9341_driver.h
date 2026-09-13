@@ -17,8 +17,8 @@
 //#include "stm32g4xx_ll_spi.h"
 //#include "stm32g4xx_ll_utils.h"
 
-#define	DISPWIDTH			240
-#define	DISPHEIGHT			320
+#define	DISPWIDTH			320
+#define	DISPHEIGHT			240
 
 #define ILI9341_CS_PIN    LL_GPIO_PIN_4
 #define ILI9341_RST_PIN   LL_GPIO_PIN_10
@@ -53,6 +53,20 @@ void ILI9341_FillRect(uint16_t x,
                       uint16_t width,
                       uint16_t height,
                       uint16_t color);
+
+void ILI9341_DrawRect(uint16_t x,
+                      uint16_t y,
+                      uint16_t width,
+                      uint16_t height,
+                      uint16_t thickness,
+                      uint16_t color);
+
+void ILI9341_DrawStringScale(uint16_t x,
+                            uint16_t y,
+                            const char *str,
+                            uint8_t scale,
+                            uint16_t color,
+                            uint16_t bg);
 
 void ILI9341_FillScreen(uint16_t color);
 void ILI9341_Init(void);

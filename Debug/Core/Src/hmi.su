@@ -1,3 +1,8 @@
-../Core/Src/hmi.c:19:13:inside_button	16	static
-../Core/Src/hmi.c:30:13:draw_screen	16	static
-../Core/Src/hmi.c:63:6:hmi_main	24	static
+../Core/Src/hmi.c:40:13:draw_up_arrow	32	static
+../Core/Src/hmi.c:62:13:draw_down_arrow	32	static
+../Core/Src/hmi.c:84:13:draw_menu_icon	16	static
+../Core/Src/hmi.c:107:13:draw_memory_button	24	static
+../Core/Src/hmi.c:138:13:draw_lift_button	16	static
+../Core/Src/hmi.c:165:13:draw_lower_button	16	static
+../Core/Src/hmi.c:192:13:draw_screen	16	static
+../Core/Src/hmi.c:241:6:hmi_main	8	static

@@ -42,7 +42,7 @@ Core/Src/hmi.o: ../Core/Src/hmi.c ../Core/Inc/main.h \
  ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_ll_tim.h \
  ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_ll_usart.h \
  ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_ll_gpio.h \
- ../Core/Inc/hmi.h ../Core/Inc/ILI9341_driver.h ../Core/Inc/touch.h
+ ../Core/Inc/hmi.h ../Core/Inc/ILI9341_driver.h
 ../Core/Inc/main.h:
 ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal.h:
 ../Core/Inc/stm32g4xx_hal_conf.h:
@@ -89,4 +89,3 @@ Core/Src/hmi.o: ../Core/Src/hmi.c ../Core/Inc/main.h \
 ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_ll_gpio.h:
 ../Core/Inc/hmi.h:
 ../Core/Inc/ILI9341_driver.h:
-../Core/Inc/touch.h:
