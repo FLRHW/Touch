@@ -1,0 +1,15 @@
+../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_ll_spi.h:394:26:LL_SPI_IsEnabled	2
+../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_ll_spi.h:678:22:LL_SPI_SetRxFIFOThreshold	1
+../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_ll_spi.h:787:22:LL_SPI_SetCRCPolynomial	1
+../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_ll_spi.h:1674:26:LL_I2S_IsEnabled	2
+../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_ll_bus.h:1139:22:LL_APB1_GRP1_ForceReset	1
+../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_ll_bus.h:1209:22:LL_APB1_GRP1_ReleaseReset	1
+../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_ll_bus.h:1539:22:LL_APB2_GRP1_ForceReset	1
+../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_ll_bus.h:1575:22:LL_APB2_GRP1_ReleaseReset	1
+../Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_ll_spi.c:133:13:LL_SPI_DeInit	4
+../Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_ll_spi.c:201:13:LL_SPI_Init	4
+../Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_ll_spi.c:279:6:LL_SPI_StructInit	1
+../Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_ll_spi.c:383:13:LL_I2S_DeInit	1
+../Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_ll_spi.c:398:13:LL_I2S_Init	7
+../Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_ll_spi.c:505:6:LL_I2S_StructInit	1
+../Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_ll_spi.c:527:6:LL_I2S_ConfigPrescaler	1

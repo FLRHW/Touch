@@ -1,0 +1,16 @@
+../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_ll_spi.h:371:22:LL_SPI_Enable	1
+../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_ll_spi.h:383:22:LL_SPI_Disable	1
+../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_ll_spi.h:531:22:LL_SPI_SetBaudRatePrescaler	1
+../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_ll_spi.h:918:26:LL_SPI_IsActiveFlag_RXNE	2
+../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_ll_spi.h:929:26:LL_SPI_IsActiveFlag_TXE	2
+../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_ll_spi.h:1348:25:LL_SPI_ReceiveData8	1
+../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_ll_spi.h:1371:22:LL_SPI_TransmitData8	1
+../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_ll_gpio.h:894:22:LL_GPIO_SetOutputPin	1
+../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_ll_gpio.h:923:22:LL_GPIO_ResetOutputPin	1
+../Core/Src/touch.c:14:13:Touch_SPI_Transfer	6
+../Core/Src/touch.c:55:13:Touch_SPI_Begin	2
+../Core/Src/touch.c:92:13:Touch_SPI_End	1
+../Core/Src/touch.c:117:13:Touch_Read12	5
+../Core/Src/touch.c:157:13:Touch_ReadAverage	4
+../Core/Src/touch.c:184:6:Touch_GetRaw	13
+../Core/Src/touch.c:260:6:Touch_GetPoint	8
