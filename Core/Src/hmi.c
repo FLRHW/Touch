@@ -36,7 +36,7 @@
 #define MENU_W      50
 #define MENU_H      50
 
-
+#define UI_GREY    0xBDF7
 
 
 
@@ -51,15 +51,15 @@ static void draw_menu_icon(void)
         MENU_W,
         MENU_H,
         3,
-        WHITE
+		UI_GREY
     );
 
     /*
      * Three horizontal menu bars.
      */
-    ILI9341_FillRect(21, 23, 28, 4, WHITE);
-    ILI9341_FillRect(21, 33, 28, 4, WHITE);
-    ILI9341_FillRect(21, 43, 28, 4, WHITE);
+    ILI9341_FillRect(21, 23, 28, 4, UI_GREY);
+    ILI9341_FillRect(21, 33, 28, 4, UI_GREY);
+    ILI9341_FillRect(21, 43, 28, 4, UI_GREY);
 }
 
 
@@ -72,7 +72,7 @@ static void draw_memory_button(uint16_t x,
         MEM_W,
         MEM_H,
         3,
-        WHITE
+		UI_GREY
     );
 
     /*
@@ -88,7 +88,7 @@ static void draw_memory_button(uint16_t x,
         MEM_Y + 14,
         text,
         2,
-        WHITE,
+		UI_GREY,
         BLACK
     );
 }
@@ -102,20 +102,20 @@ static void draw_lift_button(void)
         RIGHT_W,
         RIGHT_H,
         3,
-        WHITE
+		UI_GREY
     );
 
     ILI9341_DrawUpArrow(
         RIGHT_X + (RIGHT_W / 2),
         20,
-        WHITE
+		UI_GREY
     );
 
     ILI9341_DrawStringNoDMA(
-        RIGHT_X + 8,
+        RIGHT_X + 13,
         61,
         "LIFT",
-        WHITE,
+		UI_GREY,
         BLACK
     );
 }
@@ -129,21 +129,21 @@ static void draw_lower_button(void)
         RIGHT_W,
         RIGHT_H,
         3,
-        WHITE
+		UI_GREY
     );
 
     ILI9341_DrawStringNoDMA(
-        RIGHT_X + 2,
+        RIGHT_X + 7,
         151,
         "LOWER",
-        WHITE,
+		UI_GREY,
         BLACK
     );
 
     ILI9341_DrawDownArrow(
         RIGHT_X + (RIGHT_W / 2),
-        193,
-        WHITE
+        196,
+		UI_GREY
     );
 }
 
@@ -172,11 +172,11 @@ static void draw_screen(void)
      * height = 23 * 2      = 46 pixels
      */
     ILI9341_DrawStringScale(
-        105,
-        26,
+        63,
+        40,
         "90 cm",
-        2,
-        WHITE,
+        3,
+        UI_GREY,
         BLACK
     );
 

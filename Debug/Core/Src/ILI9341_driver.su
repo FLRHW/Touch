@@ -30,4 +30,4 @@
 ../Core/Src/ILI9341_driver.c:329:6:ILI9341_DrawStringNoDMA	48	static
 ../Core/Src/ILI9341_driver.c:366:6:ILI9341_DrawStringScale	56	static
 ../Core/Src/ILI9341_driver.c:440:6:ILI9341_DrawUpArrow	40	static
-../Core/Src/ILI9341_driver.c:490:6:ILI9341_DrawDownArrow	40	static
+../Core/Src/ILI9341_driver.c:490:6:ILI9341_DrawDownArrow	32	static

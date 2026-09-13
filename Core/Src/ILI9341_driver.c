@@ -491,50 +491,27 @@ void ILI9341_DrawDownArrow(uint16_t cx,
                            uint16_t top,
                            uint16_t color)
 {
-    const uint16_t width  = 35;
-    const uint16_t height = 18;
-    uint16_t left = cx - (width / 2);
+    uint16_t width;
 
-    ILI9341_SetAddress(
-        left,
-        top,
-        left + width - 1,
-        top + height - 1
-    );
-
-    DC_HIGH();
-    CS_LOW();
-
-    for (uint16_t row = 0; row < height; row++)
+    /*
+     * Wide at the top, narrowing toward the bottom.
+     * 18 pixels tall.
+     */
+    for (uint16_t row = 0; row < 18; row++)
     {
-        uint16_t half_width =
-            (height - 1) - row;
+        width = 35 - (row * 2);
 
-        for (uint16_t col = 0; col < width; col++)
-        {
-            int16_t dx =
-                (int16_t)col - (int16_t)(width / 2);
+        if (width == 0)
+            width = 1;
 
-            uint16_t px;
-
-            if ((dx >= -(int16_t)half_width) &&
-                (dx <=  (int16_t)half_width))
-            {
-                px = color;
-            }
-            else
-            {
-                px = BLACK;
-            }
-
-            ILI9341_SPI_Send(px >> 8);
-            ILI9341_SPI_Send(px & 0xFF);
-        }
+        ILI9341_FillRect(
+            cx - (width / 2),
+            top + row,
+            width,
+            1,
+            color
+        );
     }
-
-    while (LL_SPI_IsActiveFlag_BSY(SPI1));
-
-    CS_HIGH();
 }
 
 
